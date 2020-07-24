@@ -1,0 +1,206 @@
+{
+	"info": {
+		"_postman_id": "383c31d0-c279-4219-af8e-bf6990ed3210",
+		"name": "Order management copy",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Generate reference",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "5fcea1f6-c0f4-4917-85f9-d89006fdf04e",
+						"exec": [
+							"const response = pm.response.json();",
+							"",
+							"",
+							"pm.test(\"Should contain reference id\", function () {",
+							"    pm.expect(response.uuid).to.exist;",
+							"});",
+							"",
+							"pm.globals.set(\"referenceId\", response.uuid);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "httpbin.org/uuid",
+					"host": [
+						"httpbin",
+						"org"
+					],
+					"path": [
+						"uuid"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create order",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "f55a21c1-273b-4584-bd86-14f4cbac9bc5",
+						"exec": [
+							"const response = pm.response.json();",
+							"",
+							"if (pm.variables.get(\"isValid\") == \"true\") {",
+							"    pm.test(\"Should contain the reference id\", function () {",
+							"        pm.expect(response.json.referenceId).to.eql(pm.globals.get(\"referenceId\"));",
+							"    });",
+							"    ",
+							"    pm.test(\"Should contain the customer id\", function () {",
+							"        pm.expect(response.json.customerId).to.eql(parseInt(pm.variables.get(\"customerId\")));",
+							"    });",
+							"    ",
+							"    pm.test(\"Should contain the product id\", function () {",
+							"        pm.expect(response.json.productId).to.eql(parseInt(pm.variables.get(\"productId\")));",
+							"    });    ",
+							"} else {",
+							"    pm.test(\"Should not be valid\", function () {",
+							"       pm.expect(response.json).to.be.null;",
+							"    });",
+							"}",
+							"",
+							""
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "7436564d-6be5-463a-877a-9f570fb696d1",
+						"exec": [
+							"pm.variables.set('metaInfoBody', JSON.stringify(pm.variables.get('metaInfo')));"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"referenceId\": \"{{referenceId}}\",\n\t\"customerId\": {{customerId}},\n\t\"productId\": {{productId}},\n\t\"metaInfo\": {{metaInfo }}\n\t\n}"
+				},
+				"url": {
+					"raw": "httpbin.org/post",
+					"host": [
+						"httpbin",
+						"org"
+					],
+					"path": [
+						"post"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Check status",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "1003c5d9-ded0-4256-96e7-84359a5b9c6c",
+						"exec": [
+							"pm.test(\"Status code is \" + pm.iterationData.get('expectedStatus'), function () {",
+							"    pm.response.to.have.status(pm.iterationData.get('expectedStatus'));",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/x-www-form-urlencoded",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "httpbin.org/status/{{status}}",
+					"host": [
+						"httpbin",
+						"org"
+					],
+					"path": [
+						"status",
+						"{{status}}"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"id": "6902e056-174e-4894-9fb1-53bf7f9f2505",
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"id": "329d115d-2aac-4cec-8b8b-5db5e94f28a1",
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"id": "d974b902-eff9-4d82-8ead-b9b2d21abe12",
+			"key": "customerId",
+			"value": "100",
+			"type": "string"
+		},
+		{
+			"id": "f66a5726-cfa0-461b-b96e-33b16ab7718b",
+			"key": "productId",
+			"value": "200",
+			"type": "string"
+		},
+		{
+			"id": "fda23259-7db3-4185-916d-3368d4306194",
+			"key": "isValid",
+			"value": "true",
+			"type": "string"
+		},
+		{
+			"id": "5f641c15-a27c-4a54-9ee3-e007e62422c0",
+			"key": "metaInfo",
+			"value": "{}",
+			"type": "string"
+		}
+	],
+	"protocolProfileBehavior": {}
+}
